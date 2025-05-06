@@ -14,7 +14,7 @@ Install the library via PyPI:
 
 ```
 # For Python (using GitHub Packages)
-pip install git+https://github.com/remla25-team16/libml@v1.0.0
+pip install git+https://github.com/remla2025-team16/libml@v1.0.0
 ```
 
 #### **Usage**

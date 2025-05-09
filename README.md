@@ -1,7 +1,7 @@
 # lib-ml
 
 **Overview**
-A shared library for preprocessing restaurant review data. Used by both `model-training` and `model-service` to ensure consistency. 
+A shared library for preprocessing restaurant review data. Used by both `model-training` and `model-service` to ensure consistency. The personal contribution can be seen from `ACTIVITY.md`.  
 
 #### **Features**
 

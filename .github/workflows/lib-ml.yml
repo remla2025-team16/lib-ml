@@ -4,35 +4,81 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+          tags: true
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install dependencies and build tool
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install setuptools wheel build
+      
+      - name: Fetch all tags
+        run: git fetch --tags  --prune-tags
 
-      - name: Build Python package
+      - name: Determine version
+        id: get_version
         run: |
-          python setup.py sdist bdist_wheel
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          else
+            TAG=$(git describe --tags --abbrev=0)
+            echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+          fi
 
-      - name: Publish package to GitHub Packages
+      - name: Build Python package (sdist and wheel)
         run: |
-          twine upload --repository github dist/* --non-interactive
+          python -m build --sdist --wheel
         env:
-          TWINE_USERNAME: ${{ github.actor }}
-          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+
+      - name: List dist contents
+        run: ls -al dist
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload source archive
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/lib-ml-${{ env.VERSION }}.tar.gz
+          asset_name: lib-ml-${{ env.VERSION }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload wheel package
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/lib-ml-${{ env.VERSION }}-py3-none-any.whl
+          asset_name: lib-ml-${{ env.VERSION }}-py3-none-any.whl
+          asset_content_type: application/octet-stream

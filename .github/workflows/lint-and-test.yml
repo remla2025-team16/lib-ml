@@ -26,4 +26,4 @@ jobs:
 
       - name: Run flake8
         run: |
-          flake8 libml/ tests/ --max-line-length=100 --ignore=E501,E203,E266,E501,W503,F403,F401 --exclude=.git,__pycache__,build,dist,tests
+          flake8 libml/ tests/ --max-line-length=100 --ignore=E501,E203,E266,W503,F403,F401 --exclude=.git,__pycache__,build,dist,tests

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lib-ml",
-    version="0.2.0",
+    version="0.2.1",
     author="Anyan Huang",
     author_email="anyanhuang@tudelft.nl",
     description="A library for machine learning preprocessing",

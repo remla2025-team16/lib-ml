@@ -1,42 +1,41 @@
-import re
 import pickle
+import re
 
-import pandas as pd
 import nltk
-from nltk.stem import PorterStemmer
+import pandas as pd
 from nltk.corpus import stopwords
-from sklearn.model_selection import train_test_split
-
+from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+
 
 def build_vectorizer():
-    
+
     return CountVectorizer(
         lowercase=True,
-        stop_words='english',   
-        max_features=5000       
-    )
+        stop_words="english",
+        max_features=5000)
+
 
 def build_pipeline():
-    
+
     vectorizer = build_vectorizer()
     classifier = LogisticRegression(max_iter=200)
 
-    pipeline = Pipeline([
-        ('vectorizer', vectorizer),
-        ('classifier', classifier)
-    ])
+    pipeline = Pipeline([("vectorizer", vectorizer),
+                        ("classifier", classifier)])
 
     return pipeline
+
 
 def data_preprocessing(
     filepath: str,
     test_size: float = None,
     random_state: int = None,
     vectorizer_output: str = None,
-    vectorizer_input: str = None
+    vectorizer_input: str = None,
 ):
     """
     Load a TSV dataset with a 'Review' column, clean and stem the text,
@@ -50,49 +49,56 @@ def data_preprocessing(
         vectorizer_output: filepath to save the fitted CountVectorizer (if creating one).
         vectorizer_input: filepath of a pretrained CountVectorizer to load and use.
     """
-    nltk.download('stopwords', quiet=True)
+    nltk.download("stopwords", quiet=True)
     stemmer = PorterStemmer()
-    stops = set(stopwords.words('english')) - {'not'}
+    stops = set(stopwords.words("english")) - {"not"}
 
     # read and clean the reviews
-    df = pd.read_csv(filepath, sep='\t', quoting=3)
-    def _clean_text(text: str) -> str:
-        tokens = re.sub(r'[^a-zA-Z]', ' ', text).lower().split()
-        return ' '.join(stemmer.stem(w) for w in tokens if w not in stops)
+    df = pd.read_csv(filepath, sep="\t", quoting=3)
 
-    corpus = df['Review'].astype(str).map(_clean_text).tolist()
+    def _clean_text(text: str) -> str:
+        tokens = re.sub(r"[^a-zA-Z]", " ", text).lower().split()
+        return " ".join(stemmer.stem(w) for w in tokens if w not in stops)
+
+    corpus = df["Review"].astype(str).map(_clean_text).tolist()
 
     # if a pretrained vectorizer is given, just transform and return
     if vectorizer_input:
-        with open(vectorizer_input, 'rb') as f:
+        with open(vectorizer_input, "rb") as f:
             vec = pickle.load(f)
         return vec.transform(corpus).toarray()
-    
+
     else:
         vec = CountVectorizer(max_features=1420)
         X = vec.fit_transform(corpus).toarray()
         y = df.iloc[:, -1].values
-    
+
     # save the fitted vectorizer if requested
     if vectorizer_output:
-        with open(vectorizer_output, 'wb') as f:
+        with open(vectorizer_output, "wb") as f:
             pickle.dump(vec, f)
-    
+
     # split into train/test if parameters provided
     if test_size is not None and random_state is not None:
-        return train_test_split(X, y, test_size=test_size, random_state=random_state)
+        return train_test_split(
+            X, y, test_size=test_size, random_state=random_state)
 
     return X, y
+
 
 if __name__ == "__main__":
     import os
 
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    filepath = os.path.join(project_root, 'data', 'a1_RestaurantReviews_HistoricDump.tsv')
-    vectorizer_output = os.path.join(project_root, 'output', 'c1_BoW_Sentiment_Model.pkl')
-    test_size = 0.2                                  
-    random_state = 42                                
-    vectorizer_input = None                          
+    filepath = os.path.join(
+        project_root, "data", "a1_RestaurantReviews_HistoricDump.tsv"
+    )
+    vectorizer_output = os.path.join(
+        project_root, "output", "c1_BoW_Sentiment_Model.pkl"
+    )
+    test_size = 0.2
+    random_state = 42
+    vectorizer_input = None
 
     # Run preprocessing
     result = data_preprocessing(
@@ -100,7 +106,7 @@ if __name__ == "__main__":
         test_size=test_size,
         random_state=random_state,
         vectorizer_output=vectorizer_output,
-        vectorizer_input=vectorizer_input
+        vectorizer_input=vectorizer_input,
     )
 
     # Print results summary

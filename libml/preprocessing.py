@@ -13,19 +13,14 @@ from sklearn.pipeline import Pipeline
 
 def build_vectorizer():
 
-    return CountVectorizer(
-        lowercase=True,
-        stop_words="english",
-        max_features=5000)
+    return CountVectorizer(lowercase=True, stop_words="english", max_features=5000)
 
 
 def build_pipeline(vectorizer_text: bool = True):
-    
     if vectorizer_text:
         vectorizer = build_vectorizer()
         classifier = LogisticRegression(max_iter=200)
-        pipeline = Pipeline([("vectorizer", vectorizer),
-                            ("classifier", classifier)])
+        pipeline = Pipeline([("vectorizer", vectorizer), ("classifier", classifier)])
     else:
         classifier = LogisticRegression(max_iter=200)
         pipeline = Pipeline([("classifier", classifier)])
@@ -82,8 +77,7 @@ def data_preprocessing(
 
     # split into train/test if parameters provided
     if test_size is not None and random_state is not None:
-        return train_test_split(
-            X, y, test_size=test_size, random_state=random_state)
+        return train_test_split(X, y, test_size=test_size, random_state=random_state)
 
     return X, y
 

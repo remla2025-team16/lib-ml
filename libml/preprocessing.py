@@ -19,14 +19,16 @@ def build_vectorizer():
         max_features=5000)
 
 
-def build_pipeline():
-
-    vectorizer = build_vectorizer()
-    classifier = LogisticRegression(max_iter=200)
-
-    pipeline = Pipeline([("vectorizer", vectorizer),
-                        ("classifier", classifier)])
-
+def build_pipeline(vectorizer_text: bool = True):
+    
+    if vectorizer_text:
+        vectorizer = build_vectorizer()
+        classifier = LogisticRegression(max_iter=200)
+        pipeline = Pipeline([("vectorizer", vectorizer),
+                            ("classifier", classifier)])
+    else:
+        classifier = LogisticRegression(max_iter=200)
+        pipeline = Pipeline([("classifier", classifier)])
     return pipeline
 
 

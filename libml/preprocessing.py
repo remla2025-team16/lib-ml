@@ -26,6 +26,12 @@ def build_pipeline(vectorizer_text: bool = True):
         pipeline = Pipeline([("classifier", classifier)])
     return pipeline
 
+def clean_text(text: str) -> str:
+    nltk.download("stopwords", quiet=True)
+    stemmer = PorterStemmer()
+    stops = set(stopwords.words("english")) - {"not"}
+    tokens = re.sub(r"[^a-zA-Z]", " ", text).lower().split()
+    return " ".join(stemmer.stem(w) for w in tokens if w not in stops)
 
 def data_preprocessing(
     filepath: str,
@@ -46,18 +52,11 @@ def data_preprocessing(
         vectorizer_output: filepath to save the fitted CountVectorizer (if creating one).
         vectorizer_input: filepath of a pretrained CountVectorizer to load and use.
     """
-    nltk.download("stopwords", quiet=True)
-    stemmer = PorterStemmer()
-    stops = set(stopwords.words("english")) - {"not"}
 
     # read and clean the reviews
     df = pd.read_csv(filepath, sep="\t", quoting=3)
 
-    def _clean_text(text: str) -> str:
-        tokens = re.sub(r"[^a-zA-Z]", " ", text).lower().split()
-        return " ".join(stemmer.stem(w) for w in tokens if w not in stops)
-
-    corpus = df["Review"].astype(str).map(_clean_text).tolist()
+    corpus = df["Review"].astype(str).map(clean_text).tolist()
 
     # if a pretrained vectorizer is given, just transform and return
     if vectorizer_input:

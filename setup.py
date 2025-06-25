@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="lib-ml",
+    name="libml",
     version="0.2.1",
     author="Anyan Huang",
     author_email="anyanhuang@tudelft.nl",

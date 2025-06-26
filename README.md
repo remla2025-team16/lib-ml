@@ -13,7 +13,7 @@ A shared library for preprocessing restaurant review data. Used by both `model-t
 Install the library via GitHub Packages:
 
 ```
-pip install git+https://github.com/remla2025-team16/libml@v1.0.2
+pip install git+https://github.com/remla2025-team16/lib-ml@v1.0.2
 ```
 
 #### **Local Build & Install**
